@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,19 +50,28 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TipTimeLayout() {
     var amountInput by remember { mutableStateOf("") }
+    var porcentaje by remember { mutableStateOf("") }
+    val porcent =porcentaje.toDoubleOrNull() ?: 0.0
     val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
+    val tip = calculateTip(amount,porcent)
     Column(
         modifier = Modifier.padding(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         EditNumberField(
+            porcentaje = porcentaje,
             value = amountInput,
             onValueChange = { amountInput = it },
+            onValueChangePorcentaje = { porcentaje = it },
             modifier = Modifier
                 .padding(bottom = 32.dp)
                 .fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            text = stringResource(R.string.tip_amount, tip),
+            style = MaterialTheme.typography.displaySmall
         )
     }
 }
@@ -68,8 +79,10 @@ fun TipTimeLayout() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditNumberField(
+    porcentaje: String,
     value: String,
     onValueChange: (String) -> Unit,
+    onValueChangePorcentaje: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     TextField(
@@ -80,10 +93,9 @@ fun EditNumberField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
     )
-
     TextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = porcentaje,
+        onValueChange = onValueChangePorcentaje,
         singleLine = true,
         label = { Text(stringResource(R.string.bill_amount)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -91,7 +103,7 @@ fun EditNumberField(
     )
 }
 
-private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
+private fun calculateTip(amount: Double, tipPercent: Double ): String {
     val tip = tipPercent / 100 * amount
     return NumberFormat.getCurrencyInstance().format(tip)
 }
